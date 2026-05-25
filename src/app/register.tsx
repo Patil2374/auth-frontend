@@ -8,11 +8,12 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
+import LoadingOverlay from '../components/LoadingOverlay';
 
 const BG_IMAGE = require('../../assets/images/auth_bg.png');
 
 export default function RegisterScreen() {
-  const { register } = useAuth();
+  const { register, login } = useAuth();
   const router = useRouter();
   const { width } = useWindowDimensions();
   const isWeb = Platform.OS === 'web';
@@ -39,11 +40,19 @@ export default function RegisterScreen() {
     const result = await register(name.trim(), email.trim(), password);
     if (!result.success) {
       setError(result.message);
+      setLoading(false);
     } else {
-      setSuccess(result.message || 'Account created! Redirecting...');
-      setTimeout(() => router.replace('/'), 1500);
+      setSuccess('Account created! Signing you in...');
+      // Auto-login with same credentials
+      const loginResult = await login(email.trim(), password);
+      if (loginResult.success) {
+        router.replace('/dashboard');
+      } else {
+        // Fallback: redirect to login page if auto-login fails
+        setTimeout(() => router.replace('/'), 1200);
+      }
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // ── Inlined form JSX (NOT a sub-component — avoids focus loss on re-render) ──
@@ -152,6 +161,7 @@ export default function RegisterScreen() {
   if (isSplitLayout) {
     return (
       <View style={styles.splitRoot}>
+        <LoadingOverlay visible={loading} message={success ? 'Signing you in...' : 'Creating your account...'} />
         <StatusBar style="light" />
         <ImageBackground source={BG_IMAGE} style={styles.splitLeft}>
           <LinearGradient
@@ -194,6 +204,7 @@ export default function RegisterScreen() {
   // ── Mobile layout ──
   return (
     <ImageBackground source={BG_IMAGE} style={styles.mobileBg}>
+      <LoadingOverlay visible={loading} message={success ? 'Signing you in...' : 'Creating your account...'} />
       <LinearGradient
         colors={['rgba(15,23,42,0.65)', 'rgba(15,23,42,0.95)']}
         style={StyleSheet.absoluteFillObject}

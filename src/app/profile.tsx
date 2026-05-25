@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import AppLayout from '../components/AppLayout';
+import LoadingOverlay from '../components/LoadingOverlay';
 
 export default function ProfileScreen() {
   const { user, updateProfile } = useAuth();
@@ -46,6 +47,7 @@ export default function ProfileScreen() {
 
   return (
     <AppLayout>
+      <LoadingOverlay visible={loading} message="Saving your profile..." />
       <StatusBar style="light" />
 
       <View style={[styles.pageGrid, isWide && styles.pageGridWide]}>

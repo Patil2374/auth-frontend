@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
+import LoadingOverlay from '../components/LoadingOverlay';
 
 const BG_IMAGE = require('../../assets/images/auth_bg.png');
 
@@ -119,6 +120,7 @@ export default function LoginScreen() {
   if (isSplitLayout) {
     return (
       <View style={styles.splitRoot}>
+        <LoadingOverlay visible={loading} message="Signing you in..." />
         <StatusBar style="light" />
         <ImageBackground source={BG_IMAGE} style={styles.splitLeft} imageStyle={{ borderRadius: 0 }}>
           <LinearGradient
@@ -161,6 +163,7 @@ export default function LoginScreen() {
   // ── Mobile layout ──
   return (
     <ImageBackground source={BG_IMAGE} style={styles.mobileBg}>
+      <LoadingOverlay visible={loading} message="Signing you in..." />
       <LinearGradient
         colors={['rgba(15,23,42,0.7)', 'rgba(15,23,42,0.92)']}
         style={StyleSheet.absoluteFillObject}
