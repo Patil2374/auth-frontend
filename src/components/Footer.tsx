@@ -21,7 +21,7 @@ export default function Footer() {
 
 const styles = StyleSheet.create({
   wrapper: {
-    backgroundColor: '#0F172A',
+    backgroundColor: 'transparent',
   },
   borderLine: {
     height: 2,

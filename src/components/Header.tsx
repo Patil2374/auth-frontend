@@ -21,7 +21,7 @@ export default function Header() {
   return (
     <View style={styles.wrapper}>
       <LinearGradient
-        colors={['#0F172A', '#1E293B']}
+        colors={['rgba(15, 23, 42, 0.85)', 'rgba(30, 41, 59, 0.45)']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={styles.container}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView, Platform, useWindowDimensions } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import Header from './Header';
 import Footer from './Footer';
 
@@ -18,7 +19,12 @@ export default function AppLayout({ children, scrollable = true }: AppLayoutProp
     : { style: styles.fill };
 
   return (
-    <View style={styles.root}>
+    <LinearGradient
+      colors={['#0F172A', '#1E1B4B', '#312E81']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.root}
+    >
       <Header />
       <ContentWrapper style={styles.fill} {...contentProps}>
         <View style={[styles.pageContent, isWeb && { maxWidth: 1100, alignSelf: 'center', width: '100%' }]}>
@@ -26,14 +32,13 @@ export default function AppLayout({ children, scrollable = true }: AppLayoutProp
         </View>
       </ContentWrapper>
       <Footer />
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#0F172A',
   },
   fill: {
     flex: 1,

@@ -61,7 +61,7 @@ export default function RegisterScreen() {
       <TextInput
         style={styles.input}
         placeholder="John Doe"
-        placeholderTextColor="#475569"
+        placeholderTextColor="#A78BFA"
         autoCapitalize="words"
         value={name}
         onChangeText={setName}
@@ -72,7 +72,7 @@ export default function RegisterScreen() {
       <TextInput
         style={styles.input}
         placeholder="you@example.com"
-        placeholderTextColor="#475569"
+        placeholderTextColor="#A78BFA"
         keyboardType="email-address"
         autoCapitalize="none"
         value={email}
@@ -85,7 +85,7 @@ export default function RegisterScreen() {
         <TextInput
           style={[styles.input, styles.passwordInput]}
           placeholder="Min. 6 characters"
-          placeholderTextColor="#475569"
+          placeholderTextColor="#A78BFA"
           secureTextEntry={!showPass}
           value={password}
           onChangeText={setPassword}
@@ -100,7 +100,7 @@ export default function RegisterScreen() {
       <TextInput
         style={styles.input}
         placeholder="Re-enter your password"
-        placeholderTextColor="#475569"
+        placeholderTextColor="#A78BFA"
         secureTextEntry={!showPass}
         value={confirmPassword}
         onChangeText={setConfirmPassword}
@@ -125,7 +125,7 @@ export default function RegisterScreen() {
         activeOpacity={0.85}
       >
         <LinearGradient
-          colors={loading || success ? ['#334155', '#334155'] : ['#8B5CF6', '#EC4899']}
+          colors={loading || success ? ['#4C1D95', '#4C1D95'] : ['#8B5CF6', '#EC4899']}
           style={styles.submitBtn}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
@@ -156,16 +156,17 @@ export default function RegisterScreen() {
   // ── Split layout (web desktop ≥ 900px) ──
   if (isSplitLayout) {
     return (
-      <View style={styles.splitRoot}>
+      <LinearGradient
+        colors={['#1E1B4B', '#4C1D95', '#0F172A']}
+        style={styles.splitRoot}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
         <LoadingOverlay visible={loading} message={success ? 'Signing you in...' : 'Creating your account...'} />
         <StatusBar style="light" />
 
-        <LinearGradient
-          colors={['#0F172A', '#2D1B69', '#1E1B4B']}
-          style={styles.splitLeft}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
+        {/* Left branding panel */}
+        <View style={styles.splitLeft}>
           <View style={styles.decorCircle1} />
           <View style={styles.decorCircle2} />
 
@@ -180,16 +181,10 @@ export default function RegisterScreen() {
             </LinearGradient>
             <Text style={styles.splitAppName}>AuthApp</Text>
             <Text style={styles.splitTagline}>Join thousands of users{'\n'}building with confidence.</Text>
-            <View style={styles.featureList}>
-              {['✅ Free to use forever', '🚀 Deployed in minutes', '🔐 Enterprise-grade security'].map((f, i) => (
-                <View key={i} style={styles.featureItem}>
-                  <Text style={styles.featureText}>{f}</Text>
-                </View>
-              ))}
-            </View>
           </View>
-        </LinearGradient>
+        </View>
 
+        {/* Right form panel */}
         <ScrollView
           style={styles.splitRight}
           contentContainerStyle={styles.splitRightContent}
@@ -198,14 +193,14 @@ export default function RegisterScreen() {
           {formJSX}
           <Text style={styles.footerNote}>© {new Date().getFullYear()} AuthApp</Text>
         </ScrollView>
-      </View>
+      </LinearGradient>
     );
   }
 
   // ── Mobile / narrow layout ──
   return (
     <LinearGradient
-      colors={['#0F172A', '#2D1B69', '#0F172A']}
+      colors={['#1E1B4B', '#4C1D95', '#0F172A']}
       style={styles.mobileBg}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
@@ -236,59 +231,72 @@ export default function RegisterScreen() {
 
 const styles = StyleSheet.create({
   flex1: { flex: 1 },
-  splitRoot: { flex: 1, flexDirection: 'row', backgroundColor: '#0F172A' },
+  splitRoot: { flex: 1, flexDirection: 'row' },
   splitLeft: { flex: 1, justifyContent: 'center', alignItems: 'flex-start', padding: 60, minWidth: 420, overflow: 'hidden' },
   splitLeftContent: { zIndex: 1, maxWidth: 380 },
   decorCircle1: {
     position: 'absolute', width: 400, height: 400, borderRadius: 200,
-    backgroundColor: 'rgba(139,92,246,0.15)', top: -100, right: -100,
+    backgroundColor: 'rgba(139,92,246,0.12)', top: -100, right: -100,
   },
   decorCircle2: {
     position: 'absolute', width: 300, height: 300, borderRadius: 150,
-    backgroundColor: 'rgba(236,72,153,0.1)', bottom: 50, left: -80,
+    backgroundColor: 'rgba(236,72,153,0.08)', bottom: 50, left: -80,
   },
   splitLogoIcon: { width: 52, height: 52, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
   splitLogoIconText: { color: '#FFF', fontSize: 26, fontWeight: '900' },
   splitAppName: { color: '#FFF', fontSize: 36, fontWeight: '900', letterSpacing: -1, marginBottom: 16 },
-  splitTagline: { color: 'rgba(255,255,255,0.8)', fontSize: 20, lineHeight: 32, marginBottom: 40 },
-  featureList: { gap: 12 },
-  featureItem: { backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 10, paddingHorizontal: 16, paddingVertical: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
-  featureText: { color: '#E2E8F0', fontSize: 15, fontWeight: '500' },
-  splitRight: { width: 480, backgroundColor: '#0F172A' },
+  splitTagline: { color: 'rgba(253,242,248,0.8)', fontSize: 20, lineHeight: 32, marginBottom: 40 },
+  splitRight: { width: 480, backgroundColor: 'transparent' },
   splitRightContent: { flexGrow: 1, justifyContent: 'center', padding: 48, paddingVertical: 60 },
-  footerNote: { color: '#334155', fontSize: 12, textAlign: 'center', marginTop: 24 },
+  footerNote: { color: '#B794F4', fontSize: 12, textAlign: 'center', marginTop: 24 },
   mobileBg: { flex: 1 },
   mobileBlob1: {
     position: 'absolute', width: 300, height: 300, borderRadius: 150,
-    backgroundColor: 'rgba(139,92,246,0.2)', top: -80, right: -80,
+    backgroundColor: 'rgba(139,92,246,0.15)', top: -80, right: -80,
   },
   mobileBlob2: {
     position: 'absolute', width: 250, height: 250, borderRadius: 125,
-    backgroundColor: 'rgba(236,72,153,0.15)', bottom: 100, left: -60,
+    backgroundColor: 'rgba(236,72,153,0.1)', bottom: 100, left: -60,
   },
   mobileScroll: { flexGrow: 1, justifyContent: 'center', padding: 24, paddingTop: 70, paddingBottom: 40 },
   mobileBrand: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 32, alignSelf: 'center' },
   mobileLogoIcon: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
   mobileAppName: { color: '#FFF', fontSize: 26, fontWeight: '900', letterSpacing: -0.5 },
-  card: { backgroundColor: 'rgba(30,41,59,0.9)', borderRadius: 20, padding: 28, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', shadowColor: '#000', shadowOffset: { width: 0, height: 20 }, shadowOpacity: 0.5, shadowRadius: 30, elevation: 10 },
-  cardTitle: { color: '#F8FAFC', fontSize: 24, fontWeight: '800', letterSpacing: -0.5, marginBottom: 6 },
-  cardSubtitle: { color: '#64748B', fontSize: 14, marginBottom: 24 },
-  label: { color: '#94A3B8', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginTop: 14 },
-  input: { backgroundColor: '#0F172A', borderRadius: 10, height: 48, paddingHorizontal: 16, fontSize: 15, color: '#F8FAFC', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  
+  // ── Card ──
+  card: { 
+    backgroundColor: 'rgba(76,29,149,0.35)', 
+    borderRadius: 20, padding: 28, 
+    borderWidth: 1, borderColor: 'rgba(236,72,153,0.25)', 
+    shadowColor: '#000', shadowOffset: { width: 0, height: 20 }, 
+    shadowOpacity: 0.5, shadowRadius: 30, elevation: 10 
+  },
+  cardTitle: { color: '#FCE7F3', fontSize: 24, fontWeight: '800', letterSpacing: -0.5, marginBottom: 6 },
+  cardSubtitle: { color: '#F472B6', fontSize: 14, marginBottom: 24 },
+  label: { color: '#C4B5FD', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginTop: 14 },
+  input: { 
+    backgroundColor: '#1E1B4B', borderRadius: 10, height: 48, 
+    paddingHorizontal: 16, fontSize: 15, color: '#FCE7F3', 
+    borderWidth: 1, borderColor: 'rgba(167,139,250,0.2)' 
+  },
   passwordRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   passwordInput: { flex: 1 },
-  eyeBtn: { width: 48, height: 48, backgroundColor: '#0F172A', borderRadius: 10, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  eyeBtn: { 
+    width: 48, height: 48, backgroundColor: '#1E1B4B', borderRadius: 10, 
+    justifyContent: 'center', alignItems: 'center', 
+    borderWidth: 1, borderColor: 'rgba(167,139,250,0.2)' 
+  },
   eyeText: { fontSize: 18 },
-  errorBox: { backgroundColor: 'rgba(239,68,68,0.1)', borderRadius: 8, padding: 12, marginTop: 12, borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)' },
+  errorBox: { backgroundColor: 'rgba(239,68,68,0.15)', borderRadius: 8, padding: 12, marginTop: 12, borderWidth: 1, borderColor: 'rgba(239,68,68,0.3)' },
   errorText: { color: '#FCA5A5', fontSize: 13, fontWeight: '500' },
-  successBox: { backgroundColor: 'rgba(16,185,129,0.1)', borderRadius: 8, padding: 12, marginTop: 12, borderWidth: 1, borderColor: 'rgba(16,185,129,0.2)' },
+  successBox: { backgroundColor: 'rgba(16,185,129,0.15)', borderRadius: 8, padding: 12, marginTop: 12, borderWidth: 1, borderColor: 'rgba(16,185,129,0.3)' },
   successText: { color: '#6EE7B7', fontSize: 13, fontWeight: '500' },
   submitBtnWrap: { marginTop: 24, borderRadius: 12, overflow: 'hidden' },
   submitBtn: { height: 50, justifyContent: 'center', alignItems: 'center' },
   submitBtnText: { color: '#FFF', fontSize: 16, fontWeight: '700', letterSpacing: 0.3 },
   dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 20 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.07)' },
-  dividerText: { color: '#475569', fontSize: 12, fontWeight: '500' },
-  altBtn: { height: 46, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(139,92,246,0.4)', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(139,92,246,0.08)' },
-  altBtnText: { color: '#C4B5FD', fontWeight: '700', fontSize: 14 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: 'rgba(167,139,250,0.15)' },
+  dividerText: { color: '#C4B5FD', fontSize: 12, fontWeight: '500' },
+  altBtn: { height: 46, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(167,139,250,0.4)', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(167,139,250,0.08)' },
+  altBtnText: { color: '#D8B4FE', fontWeight: '700', fontSize: 14 },
 });
