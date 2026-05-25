@@ -2,15 +2,13 @@ import React, { useState } from 'react';
 import {
   StyleSheet, Text, TextInput, TouchableOpacity, View,
   ActivityIndicator, KeyboardAvoidingView, Platform,
-  ScrollView, ImageBackground, useWindowDimensions,
+  ScrollView, useWindowDimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import LoadingOverlay from '../components/LoadingOverlay';
-
-const BG_IMAGE = require('../../assets/images/auth_bg.png');
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -41,7 +39,7 @@ export default function LoginScreen() {
     setLoading(false);
   };
 
-  // ── Inlined form JSX (NOT a sub-component — avoids focus loss on re-render) ──
+  // ── Inlined form JSX — avoids focus loss on re-render ──
   const formJSX = (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>Welcome back</Text>
@@ -122,11 +120,18 @@ export default function LoginScreen() {
       <View style={styles.splitRoot}>
         <LoadingOverlay visible={loading} message="Signing you in..." />
         <StatusBar style="light" />
-        <ImageBackground source={BG_IMAGE} style={styles.splitLeft} imageStyle={{ borderRadius: 0 }}>
-          <LinearGradient
-            colors={['rgba(15,23,42,0.55)', 'rgba(99,102,241,0.5)']}
-            style={StyleSheet.absoluteFillObject}
-          />
+
+        {/* Left branding panel — gradient instead of PNG */}
+        <LinearGradient
+          colors={['#0F172A', '#1E1B4B', '#312E81']}
+          style={styles.splitLeft}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          {/* Decorative circles */}
+          <View style={styles.decorCircle1} />
+          <View style={styles.decorCircle2} />
+
           <View style={styles.splitLeftContent}>
             <LinearGradient
               colors={['#6366F1', '#8B5CF6']}
@@ -146,8 +151,9 @@ export default function LoginScreen() {
               ))}
             </View>
           </View>
-        </ImageBackground>
+        </LinearGradient>
 
+        {/* Right form panel */}
         <ScrollView
           style={styles.splitRight}
           contentContainerStyle={styles.splitRightContent}
@@ -160,14 +166,19 @@ export default function LoginScreen() {
     );
   }
 
-  // ── Mobile layout ──
+  // ── Mobile / narrow layout ──
   return (
-    <ImageBackground source={BG_IMAGE} style={styles.mobileBg}>
+    <LinearGradient
+      colors={['#0F172A', '#1E1B4B', '#0F172A']}
+      style={styles.mobileBg}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
+      {/* Decorative blobs */}
+      <View style={styles.mobileBlob1} />
+      <View style={styles.mobileBlob2} />
+
       <LoadingOverlay visible={loading} message="Signing you in..." />
-      <LinearGradient
-        colors={['rgba(15,23,42,0.7)', 'rgba(15,23,42,0.92)']}
-        style={StyleSheet.absoluteFillObject}
-      />
       <StatusBar style="light" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -176,6 +187,7 @@ export default function LoginScreen() {
         <ScrollView
           contentContainerStyle={styles.mobileScroll}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           <View style={styles.mobileBrand}>
             <LinearGradient colors={['#6366F1', '#8B5CF6']} style={styles.mobileLogoIcon}>
@@ -186,66 +198,92 @@ export default function LoginScreen() {
           {formJSX}
         </ScrollView>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   flex1: { flex: 1 },
 
-  // Split layout
+  // ── Split layout ──
   splitRoot: { flex: 1, flexDirection: 'row', backgroundColor: '#0F172A' },
-  splitLeft: { flex: 1, justifyContent: 'center', alignItems: 'flex-start', padding: 60, minWidth: 420 },
+  splitLeft: {
+    flex: 1, justifyContent: 'center', alignItems: 'flex-start',
+    padding: 60, minWidth: 420, overflow: 'hidden',
+  },
   splitLeftContent: { zIndex: 1, maxWidth: 380 },
-  splitLogoIcon: { width: 52, height: 52, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
+  decorCircle1: {
+    position: 'absolute', width: 400, height: 400, borderRadius: 200,
+    backgroundColor: 'rgba(99,102,241,0.15)', top: -100, right: -100,
+  },
+  decorCircle2: {
+    position: 'absolute', width: 300, height: 300, borderRadius: 150,
+    backgroundColor: 'rgba(139,92,246,0.1)', bottom: 50, left: -80,
+  },
+  splitLogoIcon: {
+    width: 52, height: 52, borderRadius: 14,
+    justifyContent: 'center', alignItems: 'center', marginBottom: 20,
+  },
   splitLogoIconText: { color: '#FFF', fontSize: 26, fontWeight: '900' },
   splitAppName: { color: '#FFF', fontSize: 36, fontWeight: '900', letterSpacing: -1, marginBottom: 16 },
-  splitTagline: { color: 'rgba(255,255,255,0.85)', fontSize: 20, lineHeight: 30, marginBottom: 40 },
+  splitTagline: { color: 'rgba(255,255,255,0.8)', fontSize: 20, lineHeight: 32, marginBottom: 40 },
   featureList: { gap: 12 },
-  featureItem: { backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 10, paddingHorizontal: 16, paddingVertical: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)' },
+  featureItem: {
+    backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 10,
+    paddingHorizontal: 16, paddingVertical: 12,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
+  },
   featureText: { color: '#E2E8F0', fontSize: 15, fontWeight: '500' },
   splitRight: { width: 480, backgroundColor: '#0F172A' },
   splitRightContent: { flexGrow: 1, justifyContent: 'center', padding: 48, paddingVertical: 60 },
   footerNote: { color: '#334155', fontSize: 12, textAlign: 'center', marginTop: 24 },
 
-  // Mobile layout
+  // ── Mobile layout ──
   mobileBg: { flex: 1 },
-  mobileScroll: { flexGrow: 1, justifyContent: 'center', padding: 24, paddingTop: 60, paddingBottom: 40 },
+  mobileBlob1: {
+    position: 'absolute', width: 300, height: 300, borderRadius: 150,
+    backgroundColor: 'rgba(99,102,241,0.2)', top: -80, right: -80,
+  },
+  mobileBlob2: {
+    position: 'absolute', width: 250, height: 250, borderRadius: 125,
+    backgroundColor: 'rgba(139,92,246,0.15)', bottom: 100, left: -60,
+  },
+  mobileScroll: { flexGrow: 1, justifyContent: 'center', padding: 24, paddingTop: 70, paddingBottom: 40 },
   mobileBrand: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 32, alignSelf: 'center' },
   mobileLogoIcon: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
   mobileAppName: { color: '#FFF', fontSize: 26, fontWeight: '900', letterSpacing: -0.5 },
 
-  // Card
+  // ── Card ──
   card: {
-    backgroundColor: 'rgba(30,41,59,0.85)',
-    borderRadius: 20,
-    padding: 32,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.07)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.4,
-    shadowRadius: 30,
-    elevation: 10,
+    backgroundColor: 'rgba(30,41,59,0.9)',
+    borderRadius: 20, padding: 28,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.5, shadowRadius: 30, elevation: 10,
   },
-  cardTitle: { color: '#F8FAFC', fontSize: 26, fontWeight: '800', letterSpacing: -0.5, marginBottom: 6 },
-  cardSubtitle: { color: '#64748B', fontSize: 14, marginBottom: 28 },
-  label: { color: '#94A3B8', fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginTop: 16 },
+  cardTitle: { color: '#F8FAFC', fontSize: 24, fontWeight: '800', letterSpacing: -0.5, marginBottom: 6 },
+  cardSubtitle: { color: '#64748B', fontSize: 14, marginBottom: 24 },
+  label: {
+    color: '#94A3B8', fontSize: 11, fontWeight: '700',
+    textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginTop: 14,
+  },
   input: {
-    backgroundColor: '#1E293B',
-    borderRadius: 10,
-    height: 48,
-    paddingHorizontal: 16,
-    fontSize: 15,
-    color: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: '#0F172A', borderRadius: 10, height: 48,
+    paddingHorizontal: 16, fontSize: 15, color: '#F8FAFC',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
   passwordRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   passwordInput: { flex: 1 },
-  eyeBtn: { width: 48, height: 48, backgroundColor: '#1E293B', borderRadius: 10, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  eyeBtn: {
+    width: 48, height: 48, backgroundColor: '#0F172A', borderRadius: 10,
+    justifyContent: 'center', alignItems: 'center',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+  },
   eyeText: { fontSize: 18 },
-  errorBox: { backgroundColor: 'rgba(239,68,68,0.1)', borderRadius: 8, padding: 12, marginTop: 12, borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)' },
+  errorBox: {
+    backgroundColor: 'rgba(239,68,68,0.1)', borderRadius: 8, padding: 12, marginTop: 12,
+    borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)',
+  },
   errorText: { color: '#FCA5A5', fontSize: 13, fontWeight: '500' },
   submitBtnWrap: { marginTop: 24, borderRadius: 12, overflow: 'hidden' },
   submitBtn: { height: 50, justifyContent: 'center', alignItems: 'center' },
@@ -253,6 +291,10 @@ const styles = StyleSheet.create({
   dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 20 },
   dividerLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.07)' },
   dividerText: { color: '#475569', fontSize: 12, fontWeight: '500' },
-  altBtn: { height: 46, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(99,102,241,0.4)', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(99,102,241,0.08)' },
+  altBtn: {
+    height: 46, borderRadius: 10, borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.4)', justifyContent: 'center', alignItems: 'center',
+    backgroundColor: 'rgba(99,102,241,0.08)',
+  },
   altBtnText: { color: '#818CF8', fontWeight: '700', fontSize: 14 },
 });

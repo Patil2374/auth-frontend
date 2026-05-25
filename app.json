@@ -45,6 +45,13 @@
       "baseUrl": "/auth-frontend",
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "64a6321b-1b0a-4c7c-ac4e-246e5e71ed9c"
+      }
+    },
+    "owner": "patil2374"
   }
 }
