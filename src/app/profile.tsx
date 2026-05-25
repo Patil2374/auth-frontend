@@ -1,38 +1,27 @@
 import React, { useState } from 'react';
-import { 
-  StyleSheet, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  View, 
-  ActivityIndicator, 
-  SafeAreaView, 
-  KeyboardAvoidingView, 
-  Platform, 
-  ScrollView 
+import {
+  StyleSheet, Text, TextInput, TouchableOpacity, View,
+  ActivityIndicator, Platform, useWindowDimensions
 } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
+import AppLayout from '../components/AppLayout';
 
 export default function ProfileScreen() {
   const { user, updateProfile } = useAuth();
-  const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isWide = Platform.OS === 'web' && width >= 760;
 
-  // State management for edit mode
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [bio, setBio] = useState(user?.bio || '');
-  
-  // Loading and alert states
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Start editing mode
-  const startEditing = () => {
+  const startEdit = () => {
     setName(user?.name || '');
     setPhone(user?.phone || '');
     setBio(user?.bio || '');
@@ -41,352 +30,246 @@ export default function ProfileScreen() {
     setIsEditing(true);
   };
 
-  // Cancel editing
-  const cancelEditing = () => {
-    setIsEditing(false);
-    setError('');
-  };
-
-  // Handle Save
   const handleSave = async () => {
     setError('');
-    setSuccess('');
-
-    if (!name.trim()) {
-      setError('Name cannot be empty.');
-      return;
-    }
-
+    if (!name.trim()) { setError('Name cannot be empty.'); return; }
     setLoading(true);
-    try {
-      const result = await updateProfile(name.trim(), phone.trim(), bio.trim());
-      if (result.success) {
-        setSuccess('Profile updated successfully!');
-        // Automatically exit edit mode after showing success
-        setTimeout(() => {
-          setIsEditing(false);
-          setSuccess('');
-        }, 1500);
-      } else {
-        setError(result.message);
-      }
-    } catch (e) {
-      setError('Failed to update profile. Please try again.');
-    } finally {
-      setLoading(false);
+    const result = await updateProfile(name.trim(), phone.trim(), bio.trim());
+    if (result.success) {
+      setSuccess('Profile updated!');
+      setTimeout(() => { setIsEditing(false); setSuccess(''); }, 1500);
+    } else {
+      setError(result.message);
     }
+    setLoading(false);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <AppLayout>
       <StatusBar style="light" />
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          
-          {/* Top Bar with Back Button */}
-          <View style={styles.topBar}>
-            <TouchableOpacity style={styles.backButton} onPress={() => router.back()} disabled={loading}>
-              <Text style={styles.backButtonText}>← Dashboard</Text>
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Profile</Text>
-            <View style={{ width: 80 }} /> {/* Spacer to align title */}
-          </View>
 
-          {/* Profile Card */}
-          <View style={styles.profileCard}>
-            {/* Avatar Circle */}
-            <View style={styles.avatarContainer}>
-              <LinearGradient
-                colors={['#8B5CF6', '#3B82F6']}
-                style={styles.avatarGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Text style={styles.avatarText}>
-                  {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                </Text>
-              </LinearGradient>
-            </View>
+      <View style={[styles.pageGrid, isWide && styles.pageGridWide]}>
+        {/* ── Left column: Avatar card ── */}
+        <View style={[styles.avatarCol, isWide && styles.avatarColWide]}>
+          <View style={styles.avatarCard}>
+            <LinearGradient
+              colors={['#6366F1', '#EC4899']}
+              style={styles.avatarCircle}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Text style={styles.avatarLetter}>
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </Text>
+            </LinearGradient>
+            <Text style={styles.avatarName}>{user?.name}</Text>
+            <Text style={styles.avatarEmail}>{user?.email}</Text>
 
-            <Text style={styles.displayName}>{user?.name}</Text>
-            <Text style={styles.displayEmail}>{user?.email}</Text>
+            <LinearGradient
+              colors={['rgba(99,102,241,0.15)', 'rgba(236,72,153,0.1)']}
+              style={styles.memberBadge}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <Text style={styles.memberBadgeText}>✦ Active Member</Text>
+            </LinearGradient>
 
-            <View style={styles.divider} />
-
-            {/* Read-Only Mode */}
             {!isEditing && (
-              <View style={styles.infoContainer}>
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Phone Number</Text>
-                  <Text style={styles.infoValue}>{user?.phone || 'Not set'}</Text>
-                </View>
+              <TouchableOpacity style={styles.editBtn} onPress={startEdit}>
+                <LinearGradient
+                  colors={['#6366F1', '#8B5CF6']}
+                  style={styles.editBtnGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  <Text style={styles.editBtnText}>✏️ Edit Profile</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
 
-                <View style={styles.infoRow}>
-                  <Text style={styles.infoLabel}>Bio</Text>
-                  <Text style={styles.infoValueBio}>{user?.bio || 'No bio written yet.'}</Text>
-                </View>
+        {/* ── Right column: Details ── */}
+        <View style={styles.detailsCol}>
+          <View style={styles.detailsCard}>
+            <Text style={styles.detailsTitle}>
+              {isEditing ? '✏️ Edit your details' : 'Profile Details'}
+            </Text>
 
-                <TouchableOpacity style={styles.editButton} onPress={startEditing}>
-                  <Text style={styles.editButtonText}>Edit Profile</Text>
-                </TouchableOpacity>
+            <LinearGradient
+              colors={['#6366F1', '#EC4899']}
+              style={styles.titleUnderline}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            />
+
+            {/* View mode */}
+            {!isEditing && (
+              <View style={styles.infoList}>
+                {[
+                  { label: 'Full Name', value: user?.name, icon: '👤' },
+                  { label: 'Email Address', value: user?.email, icon: '✉️' },
+                  { label: 'Phone Number', value: user?.phone || 'Not added yet', icon: '📞' },
+                  { label: 'Bio', value: user?.bio || 'No bio yet. Click "Edit Profile" to add one.', icon: '📝' },
+                ].map((item, i) => (
+                  <View key={i} style={styles.infoItem}>
+                    <Text style={styles.infoItemIcon}>{item.icon}</Text>
+                    <View style={styles.infoItemText}>
+                      <Text style={styles.infoLabel}>{item.label}</Text>
+                      <Text style={styles.infoValue}>{item.value}</Text>
+                    </View>
+                  </View>
+                ))}
               </View>
             )}
 
-            {/* Edit Mode */}
+            {/* Edit mode */}
             {isEditing && (
-              <View style={styles.formContainer}>
+              <View>
                 <Text style={styles.inputLabel}>Full Name</Text>
-                <TextInput 
+                <TextInput
                   style={styles.input}
                   value={name}
                   onChangeText={setName}
-                  placeholder="Enter full name"
-                  placeholderTextColor="#64748B"
+                  placeholder="Your full name"
+                  placeholderTextColor="#475569"
                   editable={!loading}
                 />
 
                 <Text style={styles.inputLabel}>Phone Number</Text>
-                <TextInput 
+                <TextInput
                   style={styles.input}
                   value={phone}
                   onChangeText={setPhone}
-                  placeholder="Enter phone number"
-                  placeholderTextColor="#64748B"
+                  placeholder="+91 98765 43210"
+                  placeholderTextColor="#475569"
                   keyboardType="phone-pad"
                   editable={!loading}
                 />
 
                 <Text style={styles.inputLabel}>Bio</Text>
-                <TextInput 
+                <TextInput
                   style={[styles.input, styles.textArea]}
                   value={bio}
                   onChangeText={setBio}
-                  placeholder="Write something about yourself..."
-                  placeholderTextColor="#64748B"
+                  placeholder="Tell us something about yourself..."
+                  placeholderTextColor="#475569"
                   multiline
                   numberOfLines={4}
+                  textAlignVertical="top"
                   editable={!loading}
                 />
 
-                {error ? <Text style={styles.errorText}>{error}</Text> : null}
-                {success ? <Text style={styles.successText}>{success}</Text> : null}
+                {error ? (
+                  <View style={styles.errorBox}>
+                    <Text style={styles.errorText}>⚠️ {error}</Text>
+                  </View>
+                ) : null}
+                {success ? (
+                  <View style={styles.successBox}>
+                    <Text style={styles.successText}>✅ {success}</Text>
+                  </View>
+                ) : null}
 
-                <View style={styles.editActions}>
-                  <TouchableOpacity 
-                    style={[styles.actionBtn, styles.cancelBtn]} 
-                    onPress={cancelEditing}
+                <View style={styles.editActionRow}>
+                  <TouchableOpacity
+                    style={styles.cancelBtn}
+                    onPress={() => { setIsEditing(false); setError(''); }}
                     disabled={loading}
                   >
                     <Text style={styles.cancelBtnText}>Cancel</Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity 
-                    style={[styles.actionBtn, styles.saveBtn]} 
+                  <TouchableOpacity
+                    style={styles.saveBtnWrap}
                     onPress={handleSave}
                     disabled={loading}
                   >
-                    {loading ? (
-                      <ActivityIndicator size="small" color="#FFF" />
-                    ) : (
-                      <Text style={styles.saveBtnText}>Save</Text>
-                    )}
+                    <LinearGradient
+                      colors={loading ? ['#334155', '#334155'] : ['#10B981', '#059669']}
+                      style={styles.saveBtn}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                    >
+                      {loading
+                        ? <ActivityIndicator size="small" color="#FFF" />
+                        : <Text style={styles.saveBtnText}>Save Changes</Text>
+                      }
+                    </LinearGradient>
                   </TouchableOpacity>
                 </View>
               </View>
             )}
-
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+        </View>
+      </View>
+    </AppLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0F172A',
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContainer: {
-    padding: 24,
-    flexGrow: 1,
-  },
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: Platform.OS === 'android' ? 36 : 12,
-    marginBottom: 24,
-  },
-  backButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 8,
-  },
-  backButtonText: {
-    color: '#94A3B8',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  headerTitle: {
-    color: '#F8FAFC',
-    fontSize: 20,
-    fontWeight: '800',
-  },
-  profileCard: {
-    backgroundColor: 'rgba(30, 41, 59, 0.7)',
-    borderRadius: 24,
-    padding: 24,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  avatarContainer: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    overflow: 'hidden',
-    marginBottom: 16,
-  },
-  avatarGradient: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    color: '#FFFFFF',
-    fontSize: 36,
-    fontWeight: '800',
-  },
-  displayName: {
-    color: '#F8FAFC',
-    fontSize: 22,
-    fontWeight: '700',
-  },
-  displayEmail: {
-    color: '#64748B',
-    fontSize: 14,
-    marginTop: 4,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    width: '100%',
-    marginVertical: 20,
-  },
-  infoContainer: {
-    width: '100%',
-  },
-  infoRow: {
-    marginBottom: 20,
-  },
-  infoLabel: {
-    color: '#64748B',
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 6,
-  },
-  infoValue: {
-    color: '#F8FAFC',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  infoValueBio: {
-    color: '#F8FAFC',
-    fontSize: 15,
-    lineHeight: 22,
-    fontWeight: '400',
-  },
-  editButton: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 12,
-    height: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 12,
-    width: '100%',
-  },
-  editButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 15,
-  },
-  formContainer: {
-    width: '100%',
-  },
-  inputLabel: {
-    color: '#94A3B8',
-    fontSize: 13,
-    fontWeight: '600',
-    marginBottom: 6,
-    marginTop: 12,
-  },
-  input: {
+  pageGrid: { flexDirection: 'column', gap: 20 },
+  pageGridWide: { flexDirection: 'row', alignItems: 'flex-start' },
+
+  avatarCol: { width: '100%' },
+  avatarColWide: { width: 280, flexShrink: 0 },
+
+  avatarCard: {
     backgroundColor: '#1E293B',
-    borderRadius: 10,
-    height: 46,
-    paddingHorizontal: 14,
-    fontSize: 15,
-    color: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  textArea: {
-    height: 100,
-    paddingTop: 10,
-    textAlignVertical: 'top', // Android multiline support
-  },
-  errorText: {
-    color: '#EF4444',
-    fontSize: 14,
-    fontWeight: '500',
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  successText: {
-    color: '#10B981',
-    fontSize: 14,
-    fontWeight: '500',
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  editActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 24,
-  },
-  actionBtn: {
-    width: '48%',
-    height: 46,
-    borderRadius: 10,
-    justifyContent: 'center',
+    borderRadius: 20,
+    padding: 24,
     alignItems: 'center',
-  },
-  cancelBtn: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(255,255,255,0.05)',
   },
-  cancelBtnText: {
-    color: '#94A3B8',
-    fontWeight: '600',
-    fontSize: 14,
+  avatarCircle: {
+    width: 100, height: 100, borderRadius: 50,
+    justifyContent: 'center', alignItems: 'center', marginBottom: 16,
   },
-  saveBtn: {
-    backgroundColor: '#10B981',
+  avatarLetter: { color: '#FFF', fontSize: 40, fontWeight: '900' },
+  avatarName: { color: '#F8FAFC', fontSize: 20, fontWeight: '800', textAlign: 'center', marginBottom: 4 },
+  avatarEmail: { color: '#64748B', fontSize: 13, textAlign: 'center', marginBottom: 16 },
+  memberBadge: {
+    paddingHorizontal: 14, paddingVertical: 7,
+    borderRadius: 100, borderWidth: 1,
+    borderColor: 'rgba(99,102,241,0.25)', marginBottom: 20,
   },
-  saveBtnText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 14,
+  memberBadgeText: { color: '#A5B4FC', fontSize: 12, fontWeight: '700' },
+  editBtn: { width: '100%', borderRadius: 10, overflow: 'hidden' },
+  editBtnGradient: { paddingVertical: 13, alignItems: 'center' },
+  editBtnText: { color: '#FFF', fontWeight: '700', fontSize: 14 },
+
+  detailsCol: { flex: 1 },
+  detailsCard: {
+    backgroundColor: '#1E293B',
+    borderRadius: 20,
+    padding: 28,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
+  detailsTitle: { color: '#F8FAFC', fontSize: 18, fontWeight: '800', marginBottom: 10 },
+  titleUnderline: { height: 3, borderRadius: 2, marginBottom: 24, width: 50 },
+
+  infoList: { gap: 16 },
+  infoItem: { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
+  infoItemIcon: { fontSize: 20, marginTop: 2 },
+  infoItemText: { flex: 1 },
+  infoLabel: { color: '#64748B', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 },
+  infoValue: { color: '#F8FAFC', fontSize: 15, fontWeight: '500', lineHeight: 22 },
+
+  inputLabel: { color: '#94A3B8', fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginTop: 16 },
+  input: { backgroundColor: '#0F172A', borderRadius: 10, height: 48, paddingHorizontal: 16, fontSize: 15, color: '#F8FAFC', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
+  textArea: { height: 100, paddingTop: 12 },
+
+  errorBox: { backgroundColor: 'rgba(239,68,68,0.1)', borderRadius: 8, padding: 12, marginTop: 16, borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)' },
+  errorText: { color: '#FCA5A5', fontSize: 13, fontWeight: '500' },
+  successBox: { backgroundColor: 'rgba(16,185,129,0.1)', borderRadius: 8, padding: 12, marginTop: 16, borderWidth: 1, borderColor: 'rgba(16,185,129,0.2)' },
+  successText: { color: '#6EE7B7', fontSize: 13, fontWeight: '500' },
+
+  editActionRow: { flexDirection: 'row', gap: 12, marginTop: 24 },
+  cancelBtn: { flex: 1, height: 46, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.04)' },
+  cancelBtnText: { color: '#94A3B8', fontWeight: '600', fontSize: 14 },
+  saveBtnWrap: { flex: 1, borderRadius: 10, overflow: 'hidden' },
+  saveBtn: { height: 46, justifyContent: 'center', alignItems: 'center' },
+  saveBtnText: { color: '#FFF', fontWeight: '700', fontSize: 14 },
 });

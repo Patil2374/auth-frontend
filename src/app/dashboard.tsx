@@ -1,224 +1,149 @@
 import React from 'react';
-import { 
-  StyleSheet, 
-  Text, 
-  TouchableOpacity, 
-  View, 
-  SafeAreaView, 
-  ScrollView 
+import {
+  StyleSheet, Text, TouchableOpacity, View, Platform, useWindowDimensions
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
+import AppLayout from '../components/AppLayout';
 
 export default function DashboardScreen() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isWide = Platform.OS === 'web' && width >= 700;
 
-  const handleLogout = async () => {
-    await logout();
-    router.replace('/');
-  };
+  const statCards = [
+    { label: 'Email', value: user?.email || '—', icon: '✉️' },
+    { label: 'Phone', value: user?.phone || 'Not set', icon: '📞' },
+    { label: 'Member Since', value: 'Today', icon: '📅' },
+  ];
+
+  const quickActions = [
+    { title: 'Edit Profile', subtitle: 'Update your information', icon: '👤', colors: ['#6366F1', '#8B5CF6'], route: '/profile' },
+    { title: 'Security', subtitle: 'Manage your password', icon: '🔐', colors: ['#10B981', '#059669'], route: null },
+    { title: 'Activity', subtitle: 'View recent activity', icon: '⚡', colors: ['#F59E0B', '#D97706'], route: null },
+    { title: 'Settings', subtitle: 'App preferences', icon: '⚙️', colors: ['#EC4899', '#BE185D'], route: null },
+  ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <AppLayout>
       <StatusBar style="light" />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Header Section */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.welcomeText}>Welcome back,</Text>
-            <Text style={styles.nameText}>{user?.name || 'User'}</Text>
-          </View>
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Text style={styles.logoutButtonText}>Logout</Text>
-          </TouchableOpacity>
-        </View>
 
-        {/* Stats Card */}
+      {/* Welcome banner */}
+      <LinearGradient
+        colors={['#1E293B', '#0F172A']}
+        style={styles.welcomeBanner}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <View style={styles.welcomeLeft}>
+          <Text style={styles.welcomeGreeting}>Good day,</Text>
+          <Text style={styles.welcomeName}>{user?.name || 'User'} 👋</Text>
+          {user?.bio ? (
+            <Text style={styles.welcomeBio} numberOfLines={2}>{user.bio}</Text>
+          ) : (
+            <TouchableOpacity onPress={() => router.push('/profile')}>
+              <Text style={styles.welcomeBioEmpty}>+ Add a bio to your profile</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         <LinearGradient
-          colors={['#1E293B', '#0F172A']}
-          style={styles.statsCard}
+          colors={['#6366F1', '#8B5CF6']}
+          style={styles.welcomeAvatar}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <Text style={styles.cardTitle}>Account Overview</Text>
-          <View style={styles.divider} />
-          
-          <View style={styles.statRow}>
-            <Text style={styles.statLabel}>Email:</Text>
-            <Text style={styles.statValue}>{user?.email}</Text>
-          </View>
-          
-          <View style={styles.statRow}>
-            <Text style={styles.statLabel}>Phone:</Text>
-            <Text style={styles.statValue}>{user?.phone || 'Not added yet'}</Text>
-          </View>
-
-          <View style={styles.statRow}>
-            <Text style={styles.statLabel}>Bio:</Text>
-            <Text style={styles.statValue} numberOfLines={2}>
-              {user?.bio || 'No bio written yet. Click edit profile to add one!'}
-            </Text>
-          </View>
+          <Text style={styles.welcomeAvatarText}>
+            {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+          </Text>
         </LinearGradient>
+      </LinearGradient>
 
-        {/* Quick Actions */}
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        
-        <View style={styles.actionsContainer}>
-          <TouchableOpacity 
-            style={styles.actionCard} 
-            onPress={() => router.push('/profile')}
+      {/* Stats row */}
+      <View style={[styles.statsRow, isWide && styles.statsRowWide]}>
+        {statCards.map((card, i) => (
+          <View key={i} style={[styles.statCard, isWide && styles.statCardWide]}>
+            <Text style={styles.statIcon}>{card.icon}</Text>
+            <Text style={styles.statLabel}>{card.label}</Text>
+            <Text style={styles.statValue} numberOfLines={1}>{card.value}</Text>
+          </View>
+        ))}
+      </View>
+
+      {/* Quick Actions */}
+      <Text style={styles.sectionTitle}>Quick Actions</Text>
+      <View style={[styles.actionsGrid, isWide && styles.actionsGridWide]}>
+        {quickActions.map((action, i) => (
+          <TouchableOpacity
+            key={i}
+            style={[styles.actionCard, isWide && styles.actionCardWide]}
+            onPress={() => action.route ? router.push(action.route as any) : alert('Coming soon!')}
+            activeOpacity={0.8}
           >
             <LinearGradient
-              colors={['#3B82F6', '#2563EB']}
+              colors={action.colors as [string, string]}
               style={styles.actionGradient}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-              <Text style={styles.actionEmoji}>👤</Text>
-              <Text style={styles.actionTitle}>My Profile</Text>
-              <Text style={styles.actionSubtitle}>View and edit details</Text>
+              <Text style={styles.actionIcon}>{action.icon}</Text>
+              <Text style={styles.actionTitle}>{action.title}</Text>
+              <Text style={styles.actionSubtitle}>{action.subtitle}</Text>
             </LinearGradient>
           </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.actionCard}
-            onPress={() => alert('Feature coming soon!')}
-          >
-            <LinearGradient
-              colors={['#10B981', '#059669']}
-              style={styles.actionGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <Text style={styles.actionEmoji}>🔒</Text>
-              <Text style={styles.actionTitle}>Security</Text>
-              <Text style={styles.actionSubtitle}>Manage passwords</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-
-      </ScrollView>
-    </SafeAreaView>
+        ))}
+      </View>
+    </AppLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0F172A',
-  },
-  scrollContainer: {
+  welcomeBanner: {
+    borderRadius: 20,
     padding: 24,
-  },
-  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: Platform.OS === 'android' ? 36 : 12,
-    marginBottom: 28,
-  },
-  welcomeText: {
-    color: '#94A3B8',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  nameText: {
-    color: '#F8FAFC',
-    fontSize: 28,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-    marginTop: 4,
-  },
-  logoutButton: {
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    marginBottom: 24,
     borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.2)',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 12,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
-  logoutButtonText: {
-    color: '#EF4444',
-    fontWeight: '700',
-    fontSize: 14,
+  welcomeLeft: { flex: 1 },
+  welcomeGreeting: { color: '#64748B', fontSize: 14, fontWeight: '500', marginBottom: 4 },
+  welcomeName: { color: '#F8FAFC', fontSize: 28, fontWeight: '800', letterSpacing: -0.5, marginBottom: 8 },
+  welcomeBio: { color: '#94A3B8', fontSize: 14, lineHeight: 20 },
+  welcomeBioEmpty: { color: '#6366F1', fontSize: 14, fontWeight: '600' },
+  welcomeAvatar: {
+    width: 64, height: 64, borderRadius: 32,
+    justifyContent: 'center', alignItems: 'center', marginLeft: 16,
   },
-  statsCard: {
-    borderRadius: 24,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
-    shadowRadius: 15,
-    elevation: 3,
-    marginBottom: 32,
-  },
-  cardTitle: {
-    color: '#F8FAFC',
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 16,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    marginBottom: 16,
-  },
-  statRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  statLabel: {
-    color: '#94A3B8',
-    fontSize: 14,
-    fontWeight: '600',
-    width: '25%',
-  },
-  statValue: {
-    color: '#F8FAFC',
-    fontSize: 14,
-    fontWeight: '500',
-    width: '70%',
-    textAlign: 'right',
-  },
-  sectionTitle: {
-    color: '#F8FAFC',
-    fontSize: 20,
-    fontWeight: '800',
-    marginBottom: 16,
-  },
-  actionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  actionCard: {
-    width: '48%',
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  actionGradient: {
+  welcomeAvatarText: { color: '#FFF', fontSize: 26, fontWeight: '900' },
+
+  statsRow: { flexDirection: 'column', gap: 12, marginBottom: 32 },
+  statsRowWide: { flexDirection: 'row' },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#1E293B',
+    borderRadius: 16,
     padding: 20,
-    height: 150,
-    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
-  actionEmoji: {
-    fontSize: 28,
-  },
-  actionTitle: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-    marginTop: 12,
-  },
-  actionSubtitle: {
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: 12,
-    marginTop: 4,
-  },
+  statCardWide: { flex: 1 },
+  statIcon: { fontSize: 22, marginBottom: 8 },
+  statLabel: { color: '#64748B', fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 4 },
+  statValue: { color: '#F8FAFC', fontSize: 15, fontWeight: '600' },
+
+  sectionTitle: { color: '#F8FAFC', fontSize: 20, fontWeight: '800', marginBottom: 16, letterSpacing: -0.3 },
+
+  actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
+  actionsGridWide: {},
+  actionCard: { width: '47%', borderRadius: 18, overflow: 'hidden' },
+  actionCardWide: { flex: 1, minWidth: 140 },
+  actionGradient: { padding: 22, minHeight: 140, justifyContent: 'space-between' },
+  actionIcon: { fontSize: 30 },
+  actionTitle: { color: '#FFF', fontSize: 16, fontWeight: '700', marginTop: 16 },
+  actionSubtitle: { color: 'rgba(255,255,255,0.65)', fontSize: 12, marginTop: 4 },
 });
