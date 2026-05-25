@@ -9,7 +9,6 @@ import { useAuth } from '../context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 
-// Background image (bundled asset)
 const BG_IMAGE = require('../../assets/images/auth_bg.png');
 
 export default function LoginScreen() {
@@ -41,8 +40,8 @@ export default function LoginScreen() {
     setLoading(false);
   };
 
-  // The form card (shared between layouts)
-  const FormCard = () => (
+  // ── Inlined form JSX (NOT a sub-component — avoids focus loss on re-render) ──
+  const formJSX = (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>Welcome back</Text>
       <Text style={styles.cardSubtitle}>Sign in to continue to your account</Text>
@@ -62,7 +61,7 @@ export default function LoginScreen() {
       <Text style={styles.label}>Password</Text>
       <View style={styles.passwordRow}>
         <TextInput
-          style={[styles.input, { flex: 1, marginBottom: 0 }]}
+          style={[styles.input, styles.passwordInput]}
           placeholder="Your password"
           placeholderTextColor="#475569"
           secureTextEntry={!showPass}
@@ -70,14 +69,14 @@ export default function LoginScreen() {
           onChangeText={setPassword}
           editable={!loading}
         />
-        <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPass(!showPass)}>
+        <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPass(p => !p)}>
           <Text style={styles.eyeText}>{showPass ? '🙈' : '👁️'}</Text>
         </TouchableOpacity>
       </View>
 
       {error ? (
         <View style={styles.errorBox}>
-          <Text style={styles.errorText}>⚠️ {error}</Text>
+          <Text style={styles.errorText}>⚠️  {error}</Text>
         </View>
       ) : null}
 
@@ -116,12 +115,11 @@ export default function LoginScreen() {
     </View>
   );
 
-  // Split layout (web desktop)
+  // ── Split layout (web desktop ≥ 900px) ──
   if (isSplitLayout) {
     return (
       <View style={styles.splitRoot}>
         <StatusBar style="light" />
-        {/* Left panel - branding */}
         <ImageBackground source={BG_IMAGE} style={styles.splitLeft} imageStyle={{ borderRadius: 0 }}>
           <LinearGradient
             colors={['rgba(15,23,42,0.55)', 'rgba(99,102,241,0.5)']}
@@ -148,20 +146,19 @@ export default function LoginScreen() {
           </View>
         </ImageBackground>
 
-        {/* Right panel - form */}
         <ScrollView
           style={styles.splitRight}
           contentContainerStyle={styles.splitRightContent}
           keyboardShouldPersistTaps="handled"
         >
-          <FormCard />
+          {formJSX}
           <Text style={styles.footerNote}>© {new Date().getFullYear()} AuthApp</Text>
         </ScrollView>
       </View>
     );
   }
 
-  // Mobile layout
+  // ── Mobile layout ──
   return (
     <ImageBackground source={BG_IMAGE} style={styles.mobileBg}>
       <LinearGradient
@@ -171,7 +168,7 @@ export default function LoginScreen() {
       <StatusBar style="light" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
+        style={styles.flex1}
       >
         <ScrollView
           contentContainerStyle={styles.mobileScroll}
@@ -183,7 +180,7 @@ export default function LoginScreen() {
             </LinearGradient>
             <Text style={styles.mobileAppName}>AuthApp</Text>
           </View>
-          <FormCard />
+          {formJSX}
         </ScrollView>
       </KeyboardAvoidingView>
     </ImageBackground>
@@ -191,116 +188,31 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  // ── Split layout ──────────────────────────────────────────────
-  splitRoot: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: '#0F172A',
-  },
-  splitLeft: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    padding: 60,
-    minWidth: 420,
-  },
-  splitLeftContent: {
-    zIndex: 1,
-    maxWidth: 380,
-  },
-  splitLogoIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  splitLogoIconText: {
-    color: '#FFF',
-    fontSize: 26,
-    fontWeight: '900',
-  },
-  splitAppName: {
-    color: '#FFF',
-    fontSize: 36,
-    fontWeight: '900',
-    letterSpacing: -1,
-    marginBottom: 16,
-  },
-  splitTagline: {
-    color: 'rgba(255,255,255,0.85)',
-    fontSize: 20,
-    fontWeight: '400',
-    lineHeight: 30,
-    marginBottom: 40,
-  },
-  featureList: {
-    gap: 12,
-  },
-  featureItem: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
-  },
-  featureText: {
-    color: '#E2E8F0',
-    fontSize: 15,
-    fontWeight: '500',
-  },
-  splitRight: {
-    width: 480,
-    backgroundColor: '#0F172A',
-  },
-  splitRightContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 48,
-    paddingVertical: 60,
-  },
-  footerNote: {
-    color: '#334155',
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 24,
-  },
+  flex1: { flex: 1 },
 
-  // ── Mobile layout ──────────────────────────────────────────────
-  mobileBg: {
-    flex: 1,
-  },
-  mobileScroll: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 24,
-    paddingTop: 60,
-    paddingBottom: 40,
-  },
-  mobileBrand: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 32,
-    alignSelf: 'center',
-  },
-  mobileLogoIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  mobileAppName: {
-    color: '#FFF',
-    fontSize: 26,
-    fontWeight: '900',
-    letterSpacing: -0.5,
-  },
+  // Split layout
+  splitRoot: { flex: 1, flexDirection: 'row', backgroundColor: '#0F172A' },
+  splitLeft: { flex: 1, justifyContent: 'center', alignItems: 'flex-start', padding: 60, minWidth: 420 },
+  splitLeftContent: { zIndex: 1, maxWidth: 380 },
+  splitLogoIcon: { width: 52, height: 52, borderRadius: 14, justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
+  splitLogoIconText: { color: '#FFF', fontSize: 26, fontWeight: '900' },
+  splitAppName: { color: '#FFF', fontSize: 36, fontWeight: '900', letterSpacing: -1, marginBottom: 16 },
+  splitTagline: { color: 'rgba(255,255,255,0.85)', fontSize: 20, lineHeight: 30, marginBottom: 40 },
+  featureList: { gap: 12 },
+  featureItem: { backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 10, paddingHorizontal: 16, paddingVertical: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)' },
+  featureText: { color: '#E2E8F0', fontSize: 15, fontWeight: '500' },
+  splitRight: { width: 480, backgroundColor: '#0F172A' },
+  splitRightContent: { flexGrow: 1, justifyContent: 'center', padding: 48, paddingVertical: 60 },
+  footerNote: { color: '#334155', fontSize: 12, textAlign: 'center', marginTop: 24 },
 
-  // ── Card ──────────────────────────────────────────────────────
+  // Mobile layout
+  mobileBg: { flex: 1 },
+  mobileScroll: { flexGrow: 1, justifyContent: 'center', padding: 24, paddingTop: 60, paddingBottom: 40 },
+  mobileBrand: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 32, alignSelf: 'center' },
+  mobileLogoIcon: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+  mobileAppName: { color: '#FFF', fontSize: 26, fontWeight: '900', letterSpacing: -0.5 },
+
+  // Card
   card: {
     backgroundColor: 'rgba(30,41,59,0.85)',
     borderRadius: 20,
@@ -312,30 +224,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 30,
     elevation: 10,
-    backdropFilter: 'blur(20px)',
   },
-  cardTitle: {
-    color: '#F8FAFC',
-    fontSize: 26,
-    fontWeight: '800',
-    letterSpacing: -0.5,
-    marginBottom: 6,
-  },
-  cardSubtitle: {
-    color: '#64748B',
-    fontSize: 14,
-    marginBottom: 28,
-    fontWeight: '400',
-  },
-  label: {
-    color: '#94A3B8',
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 8,
-    marginTop: 16,
-  },
+  cardTitle: { color: '#F8FAFC', fontSize: 26, fontWeight: '800', letterSpacing: -0.5, marginBottom: 6 },
+  cardSubtitle: { color: '#64748B', fontSize: 14, marginBottom: 28 },
+  label: { color: '#94A3B8', fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginTop: 16 },
   input: {
     backgroundColor: '#1E293B',
     borderRadius: 10,
@@ -345,82 +237,19 @@ const styles = StyleSheet.create({
     color: '#F8FAFC',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
-    marginBottom: 4,
   },
-  passwordRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
-  },
-  eyeBtn: {
-    width: 48,
-    height: 48,
-    backgroundColor: '#1E293B',
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-  },
+  passwordRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  passwordInput: { flex: 1 },
+  eyeBtn: { width: 48, height: 48, backgroundColor: '#1E293B', borderRadius: 10, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
   eyeText: { fontSize: 18 },
-  errorBox: {
-    backgroundColor: 'rgba(239,68,68,0.1)',
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(239,68,68,0.2)',
-  },
-  errorText: {
-    color: '#FCA5A5',
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  submitBtnWrap: {
-    marginTop: 24,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  submitBtn: {
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  submitBtnText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.3,
-  },
-  dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginVertical: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.07)',
-  },
-  dividerText: {
-    color: '#475569',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  altBtn: {
-    height: 46,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(99,102,241,0.4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(99,102,241,0.08)',
-  },
-  altBtnText: {
-    color: '#818CF8',
-    fontWeight: '700',
-    fontSize: 14,
-  },
+  errorBox: { backgroundColor: 'rgba(239,68,68,0.1)', borderRadius: 8, padding: 12, marginTop: 12, borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)' },
+  errorText: { color: '#FCA5A5', fontSize: 13, fontWeight: '500' },
+  submitBtnWrap: { marginTop: 24, borderRadius: 12, overflow: 'hidden' },
+  submitBtn: { height: 50, justifyContent: 'center', alignItems: 'center' },
+  submitBtnText: { color: '#FFF', fontSize: 16, fontWeight: '700', letterSpacing: 0.3 },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: 20 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.07)' },
+  dividerText: { color: '#475569', fontSize: 12, fontWeight: '500' },
+  altBtn: { height: 46, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(99,102,241,0.4)', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(99,102,241,0.08)' },
+  altBtnText: { color: '#818CF8', fontWeight: '700', fontSize: 14 },
 });
